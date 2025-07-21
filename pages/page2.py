@@ -2,33 +2,36 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.title("CSV 데이터 시각화 페이지")  # 페이지 제목
+st.title("학생 성적 데이터 시각화")  # 페이지 제목
 
-# 파일 업로드 위젯
-uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
+# 예시 데이터 (이미지의 CSV 내용)
+data = {
+    "이름": ["홍길동", "김영희", "이철수", "박민수", "최지은"],
+    "수학": [85, 90, 70, 95, 60],
+    "영어": [78, 88, 65, 92, 72],
+    "과학": [92, 84, 75, 89, 68]
+}
+df = pd.DataFrame(data)
 
-if uploaded_file is not None:
-    # CSV 파일을 데이터프레임으로 읽기
-    df = pd.read_csv(uploaded_file)
-    st.subheader("업로드된 데이터 미리보기")
-    st.dataframe(df)  # 데이터 미리보기
+st.subheader("학생별 성적 데이터")
+st.dataframe(df)  # 데이터 미리보기
 
-    # 컬럼 선택 (수치형만 자동 필터)
-    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
-    if len(numeric_cols) >= 2:
-        x_col = st.selectbox("X축 컬럼 선택", numeric_cols)
-        y_col = st.selectbox("Y축 컬럼 선택", numeric_cols, index=1)
+# 과목별 성적 막대그래프
+st.subheader("학생별 과목 성적 막대그래프")
+fig, ax = plt.subplots()
+df.set_index("이름").plot(kind="bar", ax=ax)
+ax.set_ylabel("점수")
+ax.set_title("학생별 과목 성적")
+st.pyplot(fig)
 
-        # 선택된 컬럼으로 시각화
-        fig, ax = plt.subplots()
-        ax.scatter(df[x_col], df[y_col])
-        ax.set_xlabel(x_col)
-        ax.set_ylabel(y_col)
-        ax.set_title(f"{x_col} vs {y_col} 산점도")
-        st.pyplot(fig)
-    else:
-        st.warning("시각화를 위해 2개 이상의 수치형 컬럼이 필요합니다.")
-else:
-    st.info("CSV 파일을 업로드하면 데이터와 시각화가 표시됩니다.")
+# 학생별 총점 산점도
+st.subheader("학생별 총점 산점도")
+df["총점"] = df[["수학", "영어", "과학"]].sum(axis=1)
+fig2, ax2 = plt.subplots()
+ax2.scatter(df["이름"], df["총점"], color='green')
+ax2.set_xlabel("이름")
+ax2.set_ylabel("총점")
+ax2.set_title("학생별 총점 산점도")
+st.pyplot(fig2)
 
 # 각 기능별로 주석이 달려 있습니다.
